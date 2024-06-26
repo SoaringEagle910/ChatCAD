@@ -304,6 +304,7 @@ class PositionalEncoding(nn.Module):
 class BaseCMN(AttModel):
 
     def make_model(self, tgt_vocab, cmn):
+        print("yes0")
         c = copy.deepcopy
         attn = MultiHeadedAttention(self.num_heads, self.d_model)
         ff = PositionwiseFeedForward(self.d_model, self.d_ff, self.dropout)
@@ -339,15 +340,18 @@ class BaseCMN(AttModel):
         nn.init.normal_(self.memory_matrix, 0, 1 / cfg["cmm_dim"])
 
     def init_hidden(self, bsz):
+        print("yes1")
         return []
 
     def _prepare_feature(self, fc_feats, att_feats, att_masks):
+        print("yes2")
         att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks)
         memory = self.model.encode(att_feats, att_masks)
 
         return fc_feats[..., :1], att_feats[..., :1], memory, att_masks
 
     def _prepare_feature_forward(self, att_feats, att_masks=None, seq=None):
+        print("tes3")
         att_feats, att_masks = self.clip_att(att_feats, att_masks)
         att_feats = pack_wrapper(self.att_embed, att_feats, att_masks)
 
@@ -374,6 +378,7 @@ class BaseCMN(AttModel):
         return att_feats, seq, att_masks, seq_mask
 
     def _forward(self, fc_feats, att_feats, seq, att_masks=None):
+        print("yes4")
         att_feats, seq, att_masks, seq_mask = self._prepare_feature_forward(att_feats, att_masks, seq)
         out = self.model(att_feats, seq, att_masks, seq_mask, memory_matrix=self.memory_matrix)
         outputs = F.log_softmax(self.logit(out), dim=-1)
@@ -381,11 +386,16 @@ class BaseCMN(AttModel):
         return outputs
 
     def _save_attns(self, start=False):
+        print("tes5")
         if start:
+            print("hh")
             self.attention_weights = []
+        print("hhh")
         self.attention_weights.append([layer.src_attn.attn.cpu().numpy() for layer in self.model.decoder.layers])
+        print("hhhh")
 
     def core(self, it, fc_feats_ph, att_feats_ph, memory, state, mask):
+        print("yes6")
         if len(state) == 0:
             ys = it.unsqueeze(1)
             past = [fc_feats_ph.new_zeros(self.num_layers * 2, fc_feats_ph.shape[0], 0, self.d_model),
@@ -396,6 +406,7 @@ class BaseCMN(AttModel):
         out, past = self.model.decode(memory, mask, ys, subsequent_mask(ys.size(1)).to(memory.device), past=past,
                                       memory_matrix=self.memory_matrix)
 
+        print("state=",state)
         if not self.training:
             self._save_attns(start=len(state) == 0)
         return out[:, -1], [ys.unsqueeze(0)] + past

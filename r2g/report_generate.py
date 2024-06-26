@@ -24,7 +24,7 @@ def reportGen():
         "eos_idx":0,
         "pad_idx":0,
         "use_bn":0,
-        "n_gpu":1,
+        "n_gpu":0,#    本来是1
         "topk":32,
         "sample_method":"beam_search",
         "sample_n":1,
@@ -36,9 +36,13 @@ def reportGen():
         "decoding_constraint":0, 
         "block_trigrams":1, 
         }
+    print("a")
     tokenizer = Tokenizer(cfg)
+    print("b")
     model = BaseCMNModel(cfg, tokenizer)
+    print("c")
     generator= Generator(cfg, model)
+    print("d")
     return generator
 
 

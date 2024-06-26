@@ -1,4 +1,4 @@
-from curses import KEY_LEFT
+
 import os
 import json
 import pickle as pkl
@@ -73,19 +73,44 @@ def list2str(word_list:list):
     
 
 from tkinter import N
-from revChatGPT.V3 import Chatbot
+from revChatGPT.V3 import Chatbot as OriginalChatbot
+import requests
+class Chatbot(OriginalChatbot):
+    def __init__(self,engine, api_key, base_url="https://default.api.endpoint"):
+        super().__init__(engine=engine,api_key=api_key)
+        self.base_url = base_url.rstrip('/')  # 确保 base_url 末尾没有斜杠
+
+    def ask(self, prompt):
+        response = requests.post(
+            f"{self.base_url}/chat/completions",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={"model": "gpt-3.5-turbo", "messages": [{"role": "user", "content": prompt}]},
+        )
+        return response.json()
+
+    def get_gpt_response(self, prompt):
+        response_json = self.ask(prompt)
+        # 假设 response_json 是一个字典，包含 'choices' 键
+        if "choices" in response_json and len(response_json["choices"]) > 0:
+            return response_json["choices"][0]["message"]["content"]
+        else:
+            return "No response from GPT"
 from revChatGPT.typings import ChatbotError
 import time
 
 class Chat_api:
     def __init__(self,api_key,proxy=None,verbose=False):
         self.api_key=api_key
+        self.base_url = "https://free.gpt.ge/v1"
         # if proxy:
         #     os.environ["http_proxy"] = proxy
         #     os.environ["all_proxy"] = proxy
         
         # self.chatbot = Chatbot(api_key=api_key,proxy=proxy)
+        """
         self.chatbot = Chatbot(api_key=api_key,proxy='http://127.0.0.1:7890')
+        """
+        self.chatbot=Chatbot(engine="gpt-3.5-turbo", api_key=self.api_key,base_url=self.base_url)
         # for data in chatbot.ask_stream("Hello world"):
             # print(data, end="", flush=True)
         self.now_query=""
@@ -102,7 +127,7 @@ class Chat_api:
         res=None
         for i in range(max_connection_try):
             try:
-                res=self.chatbot.ask(self.now_query)
+                res=self.chatbot.ask(self.now_query)['choices'][0]['message']['content']
                 break
             except ChatbotError:
                 print("Warn: openAI Connection Error! Try again!")
@@ -130,6 +155,8 @@ class Chat_api:
 
         for i in range(max_false_time):
             self.now_res=self.get_res()
+            print("LOOK:")
+            print(self.now_res)
             res_choice=check_res(self.now_res,possible_res)
             if res_choice: 
                 if self.verbose:

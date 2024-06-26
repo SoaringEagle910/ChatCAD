@@ -77,5 +77,6 @@ def JFinit(cfg_path,weight_path):
     imgcfg = edict(json.load(open(cfg_path)))
     img_model = Classifier(imgcfg)
     # model.to(torch.cuda())
-    img_model.load_state_dict(torch.load(weight_path))
+    device = torch.device('cpu')
+    img_model.load_state_dict(torch.load(weight_path, map_location=device))
     return img_model, imgcfg

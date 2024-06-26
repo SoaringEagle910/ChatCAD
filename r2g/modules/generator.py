@@ -52,15 +52,20 @@ class BaseGenerator(object):
     def _load_checkpoint(self, load_path):
         load_path = str(load_path)
         self.logger.info("Loading checkpoint: {} ...".format(load_path))
-        checkpoint = torch.load(load_path)
+        device = torch.device('cpu')
+        checkpoint = torch.load(load_path,map_location=device)
         self.model.load_state_dict(checkpoint['state_dict'])
 
 
 class Generator():
     def __init__(self, cfg,model):
+        print("aa")
         self.device, device_ids = self._prepare_device(cfg["n_gpu"])
+        print("bb")
         self.model = model.to(self.device)
+        print("cc")
         self._load_checkpoint(cfg["load"])
+        print("dd")
     
     def _prepare_device(self, n_gpu_use):
         n_gpu = torch.cuda.device_count()
@@ -80,15 +85,22 @@ class Generator():
     def _load_checkpoint(self, load_path):
         load_path = str(load_path)
         # self.logger.info("Loading checkpoint: {} ...".format(load_path))
-        checkpoint = torch.load(load_path)
+        device = torch.device('cpu')
+        checkpoint = torch.load(load_path,map_location=device)
         self.model.load_state_dict(checkpoint['state_dict'])
 
 
     def report(self,img):
+        print(111)
         self.model.eval()
+        print(222)
         with torch.no_grad():
+            print(333)
             img= img.to(self.device)
+            print(444)
             output, _ = self.model(img, mode='sample')
+            print(555)
             report = self.model.tokenizer.decode_batch(output.cpu().numpy())
+            print(666)
         return report
 

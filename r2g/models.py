@@ -24,26 +24,39 @@ class BaseCMNModel(nn.Module):
         return super().__str__() + '\nTrainable parameters: {}'.format(params)
 
     def forward_iu_xray(self, images, targets=None, mode='train', update_opts={}):
+        print(11111)
         att_feats_0, fc_feats_0 = self.visual_extractor(images[:, 0])
+        print(12222)
         att_feats_1, fc_feats_1 = self.visual_extractor(images[:, 1])
+        print(13333)
         fc_feats = torch.cat((fc_feats_0, fc_feats_1), dim=1)
+        print(14444)
         att_feats = torch.cat((att_feats_0, att_feats_1), dim=1)
+        print(15555)
+        print("mode:")
+        print(mode)
         if mode == 'train':
             output = self.encoder_decoder(fc_feats, att_feats, targets, mode='forward')
             return output
         elif mode == 'sample':
             output, output_probs = self.encoder_decoder(fc_feats, att_feats, mode='sample', update_opts=update_opts)
+            print(16666)
             return output, output_probs
         else:
             raise ValueError
 
     def forward_mimic_cxr(self, images, targets=None, mode='train', update_opts={}):
+        print(21111)
         att_feats, fc_feats = self.visual_extractor(images)
+        print(22222)
+        print("mode:")
+        print(mode)
         if mode == 'train':
             output = self.encoder_decoder(fc_feats, att_feats, targets, mode='forward')
             return output
         elif mode == 'sample':
             output, output_probs = self.encoder_decoder(fc_feats, att_feats, mode='sample', update_opts=update_opts)
+            print(23333)
             return output, output_probs
         else:
             raise ValueError

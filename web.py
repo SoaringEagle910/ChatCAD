@@ -33,10 +33,12 @@ def chatcad(history, message_history):
         # chat bot put here
         # response = '''**That's cool!**'''
         if isinstance(history[-1][0],str):
+            print("hhh")
             prompt=history[-1][0]
             response = chatbot_bindings.chat(prompt,ref_record)
             message_history += [{"role": "user", "content": user_message}]
         else:
+            print('HHH')
             # response,modality = chatbot_bindings.report_zh(history[-1][0]['name'])
             response,modality = chatbot_bindings.report_zh(history[-1][0][0])
             message_history[-1]= {"role": "user", "content": f"用户上传了一张{modality}并请求诊断结果。"}
@@ -70,9 +72,12 @@ def add_state(info, history, message_key, message_history):
     try:
         global chatbot_bindings
         chatbot_bindings = gpt_bot(engine="gpt-3.5-turbo",api_key=info)
+        print(11)
         chatbot_bindings.start()
+        print(22)
         # chatbot_bindings = 1
         response = '**初始化成功！**'
+        print(33)
     except:
         chatbot_bindings = None
         response = '**初始化失败，请输入正确的openai key。**'
@@ -114,7 +119,7 @@ with gr.Blocks(css="""#col_container1 {margin-left: auto; margin-right: auto;}
             with gr.Row():
                 gr.Markdown("### 请上传您想要咨询的医学图像   若您没有图像，可以下载下方的示例图像")
             with gr.Row():
-                upload_file = gr.UploadButton("📁上传图像", file_types=["file"], elem_id='upload_btn').style(size='lg')
+                upload_file = gr.UploadButton("📁上传图像", file_types=["file"], elem_id='upload_btn')#.style(size='lg')
             with gr.Row():
                 img_i = gr.Image(show_label=False, type="numpy", interactive=False)
                 gr.Examples(
@@ -130,7 +135,7 @@ with gr.Blocks(css="""#col_container1 {margin-left: auto; margin-right: auto;}
         with gr.Column(scale=0.8):
             with gr.Row():
                 with gr.Column(elem_id = "col_container1"):
-                    chatbot = gr.Chatbot(value=[(None, description)], label="ChatCAD plus", elem_id='chatbot').style(height=700) #c
+                    chatbot = gr.Chatbot(value=[(None, description)], label="ChatCAD plus", elem_id='chatbot')#.style(height=700) #c
             with gr.Row():
                 with gr.Column(elem_id = "col_container2", scale=0.85):
                     inputs = gr.Textbox(label="聊天框", placeholder="请输入文本或者上传图片") #t
@@ -162,7 +167,7 @@ with gr.Blocks(css="""#col_container1 {margin-left: auto; margin-right: auto;}
     # 127.0.0.1.1:7890
     # demo.queue().launch(server_port=4900, server_name="0.0.0.0", favicon_path="shtu.ico",share=True)
     # demo.queue().launch(server_port=4900, server_name="127.0.0.1", favicon_path="shtu.ico")
-    demo.queue().launch(server_port=4900, server_name="127.0.0.1", favicon_path="shtu.ico")
+    demo.queue().launch(server_port=4900, server_name="127.0.0.1", favicon_path="shtu.ico",share=True)
 
     
     
